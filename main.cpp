@@ -148,6 +148,95 @@ void drawRubikCube() {
 	glPopMatrix();
 }
 
+/*
+void drawCubeOutline() {
+	glLineWidth(8.0); // Set line width for the outline
+	glBegin(GL_LINES);
+	glColor3f(1.0, 1.0, 1.0); // Set color to black for the outline
+
+	// Draw the edges of the cube
+	// Bottom face
+	glVertex3f(-0.5, -0.5, -0.5);
+	glVertex3f(0.5, -0.5, -0.5);
+
+	glVertex3f(0.5, -0.5, -0.5);
+	glVertex3f(0.5, -0.5, 0.5);
+
+	glVertex3f(0.5, -0.5, 0.5);
+	glVertex3f(-0.5, -0.5, 0.5);
+
+	glVertex3f(-0.5, -0.5, 0.5);
+	glVertex3f(-0.5, -0.5, -0.5);
+
+	// Top face
+	glVertex3f(-0.5, 0.5, -0.5);
+	glVertex3f(0.5, 0.5, -0.5);
+
+	glVertex3f(0.5, 0.5, -0.5);
+	glVertex3f(0.5, 0.5, 0.5);
+
+	glVertex3f(0.5, 0.5, 0.5);
+	glVertex3f(-0.5, 0.5, 0.5);
+
+	glVertex3f(-0.5, 0.5, 0.5);
+	glVertex3f(-0.5, 0.5, -0.5);
+
+	// Vertical edges
+	glVertex3f(-0.5, -0.5, -0.5);
+	glVertex3f(-0.5, 0.5, -0.5);
+
+	glVertex3f(0.5, -0.5, -0.5);
+	glVertex3f(0.5, 0.5, -0.5);
+
+	glVertex3f(0.5, -0.5, 0.5);
+	glVertex3f(0.5, 0.5, 0.5);
+
+	glVertex3f(-0.5, -0.5, 0.5);
+	glVertex3f(-0.5, 0.5, 0.5);
+
+	glEnd();
+}
+*/
+
+void drawRubikCubicUnit() {
+	// Draw a single unit of the Rubik Cube with outline
+	glPushMatrix();
+	glScalef(0.5, 0.5, 0.5);
+	drawRubikCube();  // Draw the unit cube
+	//drawCubeOutline(); // Draw the outline
+	glPopMatrix();
+}
+
+/*
+void drawFullRubikCube() {
+	float spacing = 0.1; // Space between the cubes
+	float size = 1.0;    // Size of each unit cube
+
+	// Loop to create a 3x3x3 cube
+	for (int x = -1; x <= 1; x++) {
+		for (int y = -1; y <= 1; y++) {
+			for (int z = -1; z <= 1; z++) {
+				glPushMatrix();
+				// Position each unit cube
+				glTranslatef(x * (size + spacing), y * (size + spacing), z * (size + spacing));
+				drawRubikCubicUnit(); // Draw the unit cube with outline
+				glPopMatrix();
+			}
+		}
+	}
+}
+*/
+
+void drawFullRubikCube() {
+	// Draw two unit cubes
+	glPushMatrix();
+	glTranslatef(0.0, 0.0, 0.0);
+	drawRubikCubicUnit();
+	glPopMatrix();
+
+	
+}
+
 
 void setLighting() {
 
@@ -212,8 +301,11 @@ void display(void) {
 	if (axesOn == 1)
 		drawAxes();
 
-	glScalef(2.0, 2.0, 2.0);
-	drawRubikCube();
+	//drawRubikCubicUnit();
+	glPushMatrix();
+	glScalef(1.0, 1.0, 1.0);
+	drawFullRubikCube();
+	glPopMatrix();
 
 	glPopMatrix();
 	glutSwapBuffers();
