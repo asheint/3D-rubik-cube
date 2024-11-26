@@ -7,19 +7,25 @@ constexpr float PI = 3.14159265358979323846;
 
 int width;
 int height;
-unsigned char* image;
-GLuint tex; //texture ID
+
+GLfloat camXInit = 0.0; GLfloat camYInit = 4.0; GLfloat camZInit = 0.0;
+GLfloat sceRXInit = 0.0; GLfloat sceRYInit = -30.0; GLfloat sceRZInit = 0.0;
+GLfloat sceTXInit = 0.0; GLfloat sceTYInit = 0.0; GLfloat sceTZInit = -2;
 
 //variables to move the camera
-GLfloat camX = 0.0; GLfloat camY = 0.0; GLfloat camZ = 0.0;
+GLfloat camX = camXInit; GLfloat camY = camYInit; GLfloat camZ = camZInit;
+
+//variables to move the look at position
+GLfloat lookX = 0.0; GLfloat lookY = 0.0; GLfloat lookZ = 0.0;
 
 //variables to move the scene
-GLfloat sceRX = 0.0; GLfloat sceRY = 0.0; GLfloat sceRZ = 0.0;
-GLfloat sceTX = 0.0; GLfloat sceTY = 0.0; GLfloat sceTZ = 0.0;
+GLfloat sceRX = sceRXInit; GLfloat sceRY = sceRYInit; GLfloat sceRZ = sceRZInit;
+GLfloat sceTX = sceTXInit; GLfloat sceTY = sceTYInit; GLfloat sceTZ = sceTZInit;
 
 ////variables to move the objects
 GLfloat objRX = 0.0; GLfloat objRY = 0.0; GLfloat objRZ = 0.0;
 GLfloat objTX = 0.0; GLfloat objTY = 0.0; GLfloat objTZ = 0.0;
+
 
 //To on/off grids and axes
 int gridOn = 0;
@@ -61,182 +67,90 @@ void drawAxes() {
 	glEnd();
 }
 
-/*
-void loadTextures() {
-	image = SOIL_load_image("coattexure.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-
-	if (image == NULL) {
-		printf("Error : %s", SOIL_last_result());
-	}
-
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-}
-*/
-
 void init(void) {
-	glClearColor(0.0, 0.8, 0.8, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClearDepth(1.0);
 	glEnable(GL_DEPTH_TEST);
-	//loadTextures();
 }
 
-void drawRubikCube() {
-	// Draw the Rubik Cube
-	glPushMatrix();
-	glTranslatef(0.0, 0.0, 0.0);
-	glRotatef(objRY, 0.0, 1.0, 0.0);
-	glScalef(1.0, 1.0, 1.0);
 
-	// Right face (Green)
+float start = 2.25;
+int topLayerAngle = 0;
+int middleLayerAngle = 0;
+int bottomLayerAngle = 0;
+
+void singleCube() {
+	float cubesize = 1.0;
 	glBegin(GL_QUADS);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glEnd();
 
-	// Front face (Red)
-	glBegin(GL_QUADS);
-	glColor3f(1.0, 0.0, 0.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glEnd();
+	// Front Face (Red)
+	glColor3f(1.0f, 0.0f, 0.0f); 
+	glVertex3f(-1.0f, -1.0f, 1.0f);
+	glVertex3f(1.0f, -1.0f, 1.0f);
+	glVertex3f(1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
 
-	// Back face (Orange)
-	glBegin(GL_QUADS);
-	glColor3f(1.0, 0.5, 0.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glEnd();
+	// Back Face (Orange)
+	glColor3f(1.0f, 0.647f, 0.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
+	glVertex3f(1.0f, 1.0f, -1.0f);
+	glVertex3f(1.0f, -1.0f, -1.0f);
 
-	// Left face (Blue)
-	glBegin(GL_QUADS);
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glEnd();
+	// Top Face (Yellow)
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
+	glVertex3f(1.0f, 1.0f, 1.0f);
+	glVertex3f(1.0f, 1.0f, -1.0f);
 
-	// Top face (Yellow)
-	glBegin(GL_QUADS);
-	glColor3f(1.0, 1.0, 0.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glEnd();
+	// Bottom Face (White)
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, -1.0f);
+	glVertex3f(1.0f, -1.0f, -1.0f);
+	glVertex3f(1.0f, -1.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f);
 
-	// Bottom face (White)
-	glBegin(GL_QUADS);
-	glColor3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glEnd();
+	// Right Face (Green)
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(1.0f, -1.0f, -1.0f);
+	glVertex3f(1.0f, 1.0f, -1.0f);
+	glVertex3f(1.0f, 1.0f, 1.0f);
+	glVertex3f(1.0f, -1.0f, 1.0f);
 
-	glPopMatrix();
-}
-
-/*
-void drawCubeOutline() {
-	glLineWidth(8.0); // Set line width for the outline
-	glBegin(GL_LINES);
-	glColor3f(1.0, 1.0, 1.0); // Set color to black for the outline
-
-	// Draw the edges of the cube
-	// Bottom face
-	glVertex3f(-0.5, -0.5, -0.5);
-	glVertex3f(0.5, -0.5, -0.5);
-
-	glVertex3f(0.5, -0.5, -0.5);
-	glVertex3f(0.5, -0.5, 0.5);
-
-	glVertex3f(0.5, -0.5, 0.5);
-	glVertex3f(-0.5, -0.5, 0.5);
-
-	glVertex3f(-0.5, -0.5, 0.5);
-	glVertex3f(-0.5, -0.5, -0.5);
-
-	// Top face
-	glVertex3f(-0.5, 0.5, -0.5);
-	glVertex3f(0.5, 0.5, -0.5);
-
-	glVertex3f(0.5, 0.5, -0.5);
-	glVertex3f(0.5, 0.5, 0.5);
-
-	glVertex3f(0.5, 0.5, 0.5);
-	glVertex3f(-0.5, 0.5, 0.5);
-
-	glVertex3f(-0.5, 0.5, 0.5);
-	glVertex3f(-0.5, 0.5, -0.5);
-
-	// Vertical edges
-	glVertex3f(-0.5, -0.5, -0.5);
-	glVertex3f(-0.5, 0.5, -0.5);
-
-	glVertex3f(0.5, -0.5, -0.5);
-	glVertex3f(0.5, 0.5, -0.5);
-
-	glVertex3f(0.5, -0.5, 0.5);
-	glVertex3f(0.5, 0.5, 0.5);
-
-	glVertex3f(-0.5, -0.5, 0.5);
-	glVertex3f(-0.5, 0.5, 0.5);
+	// Left Face (Blue)
+	glColor3f(0.0f, 0.0f, 1.0f); 
+	glVertex3f(-1.0f, -1.0f, -1.0f);
+	glVertex3f(-1.0f, -1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
 
 	glEnd();
 }
-*/
 
-void drawRubikCubicUnit() {
-	// Draw a single unit of the Rubik Cube with outline
-	glPushMatrix();
-	glScalef(0.5, 0.5, 0.5);
-	drawRubikCube();  // Draw the unit cube
-	//drawCubeOutline(); // Draw the outline
-	glPopMatrix();
-}
-
-/*
-void drawFullRubikCube() {
-	float spacing = 0.1; // Space between the cubes
-	float size = 1.0;    // Size of each unit cube
-
-	// Loop to create a 3x3x3 cube
-	for (int x = -1; x <= 1; x++) {
-		for (int y = -1; y <= 1; y++) {
-			for (int z = -1; z <= 1; z++) {
-				glPushMatrix();
-				// Position each unit cube
-				glTranslatef(x * (size + spacing), y * (size + spacing), z * (size + spacing));
-				drawRubikCubicUnit(); // Draw the unit cube with outline
-				glPopMatrix();
-			}
+void singleLayer() {
+	for (float i = -start; i <= start; i += start) {
+		for (float k = -start; k <= start; k += start) {
+			glPushMatrix();
+			glTranslatef(i, 0, k);
+			singleCube();
+			glPopMatrix();
 		}
 	}
 }
-*/
 
-void drawFullRubikCube() {
-	// Draw two unit cubes
-	glPushMatrix();
-	glTranslatef(0.0, 0.0, 0.0);
-	drawRubikCubicUnit();
-	glPopMatrix();
+void drawRubiksCube() {
+	GLfloat angles[] = { topLayerAngle, middleLayerAngle, bottomLayerAngle };
+	GLfloat translations[] = { start, 0, -start };
 
-	
+	for (int i = 0; i < 3; ++i) {
+		glPushMatrix();
+		glRotatef(angles[i], 0, 1, 0);
+		glTranslatef(0, start - i * start, 0);
+		singleLayer();
+		glPopMatrix();
+	}
 }
-
 
 void setLighting() {
 
@@ -280,6 +194,7 @@ void setLighting() {
 }
 
 
+
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -297,15 +212,11 @@ void display(void) {
 	glColor3f(0.1, 0.1, 0.1);
 	if (gridOn == 1)
 		drawGrid();
-	//draw the three axes
+	//Draw the three axes
 	if (axesOn == 1)
 		drawAxes();
 
-	//drawRubikCubicUnit();
-	glPushMatrix();
-	glScalef(1.0, 1.0, 1.0);
-	drawFullRubikCube();
-	glPopMatrix();
+	drawRubiksCube();
 
 	glPopMatrix();
 	glutSwapBuffers();
@@ -318,24 +229,24 @@ void reshape(GLsizei w, GLsizei h) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	//Define the Perspective projection frustum 
+	//Define the Perspective projection frustum
 	// (FOV_in_vertical, aspect_ratio, z-distance to the near plane from the camera position, z-distance to far plane from the camera position)
-	gluPerspective(120.0, aspect_ratio, 1.0, 100.0);
+	gluPerspective(120.0, aspect_ratio, 0.001, 5000.0);
 
 }
 
 void keyboardSpecial(int key, int x, int y) {
 	if (key == GLUT_KEY_UP)
-		camY += 1;
+		camY += 0.2;
 
 	if (key == GLUT_KEY_DOWN)
-		camY -= 1;
-
-	if (key == GLUT_KEY_RIGHT)
-		sceTX += 1;
+		camY -= 0.2;
 
 	if (key == GLUT_KEY_LEFT)
-		sceTX -= 1;
+		sceRY += 2;
+
+	if (key == GLUT_KEY_RIGHT)
+		sceRY -= 2;
 
 	glutPostRedisplay();
 }
@@ -353,17 +264,136 @@ void keyboard(unsigned char key, int x, int y) {
 	if (key == 'z')
 		sceTZ -= 1;
 
-	if (key == 'w')
-		sceTX += 1;
+	if (key == 'a') {
+		sceTX += 0.5;
+		objTX -= 0.5;
+	}
+	if (key == 'A') {
+		sceTX += 2;
+		objTX -= 2;
+	}
 
-	if (key == 's')
-		sceTX -= 1;
+	if (key == 'd') {
+		sceTX -= 0.5;
+		objTX += 0.5;
+	}
+	if (key == 'D') {
+		sceTX -= 2;
+		objTX += 2;
+	}
+
+	if (key == 'w') {
+		sceTZ += 0.5;
+		objTZ -= 0.5;
+	}
+	if (key == 'W') {
+		sceTZ += 2;
+		objTZ -= 2;
+	}
+
+	if (key == 's') {
+		sceTZ -= 0.5;
+		objTZ += 0.5;
+	}
+	if (key == 'S') {
+		sceTZ -= 2;
+		objTZ += 2;
+	}
+
+	if (key == 'q') {
+		sceTY += 0.5;
+		objTY -= 0.5;
+	}
+	if (key == 'Q') {
+		sceTY += 2;
+		objTY -= 2;
+	}
+
+	if (key == 'e') {
+		sceTY -= 0.5;
+		objTY += 0.5;
+	}
+	if (key == 'E') {
+		sceTY -= 2;
+		objTY += 2;
+	}
+
+	if (key == '6')
+		start += 1;
+
+	if (key == '4')
+		if (start > 2) {
+			start -= 1;
+		}
+		else {
+			start = 2;
+		}
+
+
+	int angleChange = 90;
+	if (key == 't')
+		topLayerAngle += angleChange;
+	if (key == 'T')
+		topLayerAngle -= angleChange;
 
 	if (key == 'y')
-		sceRY += 1;
-
+		middleLayerAngle += angleChange;
 	if (key == 'Y')
-		sceRY -= 1;
+		middleLayerAngle -= angleChange;
+
+	if (key == 'u')
+		bottomLayerAngle += angleChange;
+	if (key == 'U')
+		bottomLayerAngle -= angleChange;
+
+	if (key == '+')
+		start += 0.05;
+	if (key == '-') {
+		if (start > 2) {
+			start -= 0.05;
+		}
+	}
+
+	if (key == 'r') {
+		topLayerAngle = 0;
+		bottomLayerAngle = 0;
+		middleLayerAngle = 0;
+	}
+	if (key == 'R') {
+		start = 2.25;
+	}
+
+	if (key == '.') {
+		lookX = 0;
+		lookY = 0;
+		lookZ = 0;
+
+		camX = camXInit;
+		camY = camYInit;
+		camZ = camZInit;
+
+		sceRX = sceRXInit;
+		sceRY = sceRYInit;
+		sceRZ = sceRZInit;
+
+		sceTX = sceTXInit;
+		sceTY = sceTYInit;
+		sceTZ = sceTZInit;
+
+		objRX = 0;
+		objRY = 0;
+		objRZ = 0;
+
+		objTX = 0;
+		objTY = 0;
+		objTZ = 0;
+	}
+
+	if (key == '6')
+		glShadeModel(GL_FLAT);
+
+	if (key == '7')
+		glShadeModel(GL_SMOOTH);
 
 	if (key == '!')
 		glDisable(GL_LIGHT0); // Light at -x
@@ -378,15 +408,14 @@ void keyboard(unsigned char key, int x, int y) {
 		glEnable(GL_LIGHT1);
 
 	//Grids and axes
-	if (key == 'G')
+	if (key == '0')
 		gridOn = 1;
-	if (key == 'g')
+	if (key == ')')
 		gridOn = 0;
-	if (key == 'A')
+	if (key == '9')
 		axesOn = 1;
-	if (key == 'a')
+	if (key == '(')
 		axesOn = 0;
-
 
 
 	glutPostRedisplay();
@@ -396,7 +425,7 @@ int main(void) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(400, 400);
 	glutInitWindowPosition(0, 0);
-	glutCreateWindow("3D Rubik Cube - End 202021");
+	glutCreateWindow("Rubik Cube");
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(keyboardSpecial);
 	glutDisplayFunc(display);
